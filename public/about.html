@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About · P2P Chat</title>
+  <meta name="description" content="How P2P Chat works — privacy, encryption, and data storage explained." />
+  <meta name="theme-color" content="#0f0f13" />
+  <link rel="icon" type="image/webp" href="/p2p_logo.webp" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f13;
+      --surface: #1a1a24;
+      --surface2: #22222f;
+      --border: #2e2e3f;
+      --accent: #6c63ff;
+      --accent-dim: #4a4399;
+      --text: #e8e8f0;
+      --text-dim: #8888aa;
+      --success: #4caf7d;
+      --warn: #e5a64b;
+      --error: #e5534b;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────────── */
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.9rem 1.5rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    header a {
+      color: var(--accent);
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+
+    header a:hover { opacity: 0.85; }
+
+    .header-sep {
+      color: var(--border);
+      font-size: 1.2rem;
+      user-select: none;
+    }
+
+    header span {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    /* ── Content ─────────────────────────────────────────────────────── */
+
+    main {
+      flex: 1;
+      max-width: 680px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.5px;
+    }
+
+    .page-subtitle {
+      color: var(--text-dim);
+      font-size: 1rem;
+      margin-top: 0.4rem;
+      line-height: 1.6;
+    }
+
+    /* ── Cards ───────────────────────────────────────────────────────── */
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .card-icon {
+      font-size: 1.4rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .card p {
+      color: var(--text-dim);
+      font-size: 0.92rem;
+      line-height: 1.65;
+    }
+
+    .card p strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ── Highlight cards ─────────────────────────────────────────────── */
+
+    .card.highlight-green {
+      border-color: #2a6b52;
+      background: #111e18;
+    }
+    .card.highlight-green .card-title { color: var(--success); }
+
+    .card.highlight-purple {
+      border-color: var(--accent-dim);
+      background: #13122a;
+    }
+    .card.highlight-purple .card-title { color: var(--accent); }
+
+    /* ── Warning card ────────────────────────────────────────────────── */
+
+    .card.warning {
+      border-color: #7a5200;
+      background: #1a1200;
+    }
+    .card.warning .card-title { color: var(--warn); }
+
+    .warn-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      padding: 0;
+    }
+
+    .warn-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.55;
+    }
+
+    .warn-list li::before {
+      content: '⚠';
+      color: var(--warn);
+      flex-shrink: 0;
+      font-size: 0.85rem;
+      margin-top: 0.1rem;
+    }
+
+    .warn-list li strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ── Feature grid ────────────────────────────────────────────────── */
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+
+    .feature-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .feature-item-icon { font-size: 1.3rem; }
+
+    .feature-item-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .feature-item-desc {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* ── Back button ─────────────────────────────────────────────────── */
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      padding: 0.7rem 1.4rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      align-self: flex-start;
+      transition: opacity 0.15s;
+    }
+    .back-btn:hover { opacity: 0.85; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="/">P2P Chat</a>
+  <span class="header-sep">/</span>
+  <span>About</span>
+</header>
+
+<main>
+
+  <div>
+    <div class="page-title">How it works</div>
+    <div class="page-subtitle">P2P Chat connects you directly to another person — no middleman reads or stores your conversation.</div>
+  </div>
+
+  <!-- Privacy first -->
+  <div class="card highlight-green">
+    <div class="card-header">
+      <span class="card-icon">🔒</span>
+      <span class="card-title">Your conversation is private</span>
+    </div>
+    <p>
+      Once a connection is established, messages, calls, and file transfers travel <strong>directly between your browser and your peer's browser</strong> using WebRTC — the same technology used in video calling apps. No server ever sees your content.
+    </p>
+    <p>
+      There are no accounts, no logins, and no email addresses. You get a randomly generated identity when you first open the app. You can rename it to anything you like.
+    </p>
+  </div>
+
+  <!-- No auth -->
+  <div class="card highlight-purple">
+    <div class="card-header">
+      <span class="card-icon">🪪</span>
+      <span class="card-title">No account required</span>
+    </div>
+    <p>
+      There is no sign-up flow, no password, and no phone number verification. Your identity is a random ID generated and <strong>stored only in your browser</strong>. Share a room link with someone and start chatting immediately.
+    </p>
+  </div>
+
+  <!-- What we do use a server for -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-icon">☁️</span>
+      <span class="card-title">What the server actually does</span>
+    </div>
+    <p>
+      A small Cloudflare Worker is used only for <strong>signaling</strong> — helping your browser and your peer's browser find each other and negotiate a direct connection. Think of it as a temporary introduction. Once the WebRTC connection is live, the server is no longer involved.
+    </p>
+    <p>
+      The server also enforces room capacity (max 2 peers) and handles moderation actions like bans. It stores nothing about your messages.
+    </p>
+  </div>
+
+  <!-- Feature grid -->
+  <div class="feature-grid">
+    <div class="feature-item">
+      <span class="feature-item-icon">💬</span>
+      <span class="feature-item-label">Text chat</span>
+      <span class="feature-item-desc">Real-time messaging over an encrypted P2P data channel.</span>
+    </div>
+    <div class="feature-item">
+      <span class="feature-item-icon">🎙️</span>
+      <span class="feature-item-label">Audio calls</span>
+      <span class="feature-item-desc">One-click audio calls with no third-party relay.</span>
+    </div>
+    <div class="feature-item">
+      <span class="feature-item-icon">📹</span>
+      <span class="feature-item-label">Video calls</span>
+      <span class="feature-item-desc">Full video calling with local picture-in-picture preview.</span>
+    </div>
+    <div class="feature-item">
+      <span class="feature-item-icon">📎</span>
+      <span class="feature-item-label">File transfer</span>
+      <span class="feature-item-desc">Send files up to 100 MB directly to your peer with progress tracking.</span>
+    </div>
+  </div>
+
+  <!-- Data storage warning -->
+  <div class="card warning">
+    <div class="card-header">
+      <span class="card-icon">⚠️</span>
+      <span class="card-title">Your data lives in this browser only</span>
+    </div>
+    <p>
+      Messages, received files, and your identity are saved in your browser's local storage (IndexedDB). This means:
+    </p>
+    <ul class="warn-list">
+      <li><strong>Clearing your browser data will permanently delete all chat history and received files.</strong> There is no cloud backup and no way to recover it.</li>
+      <li><strong>Private / incognito mode</strong> stores data only for the duration of the session. Closing the window erases everything.</li>
+      <li><strong>Switching devices or browsers</strong> means starting fresh — your history does not follow you.</li>
+      <li><strong>Your identity is tied to this browser.</strong> If you lose it, the other person will see you as a new unknown user when you reconnect.</li>
+    </ul>
+    <p>If you want to keep a conversation, save important messages or files before clearing your browser data.</p>
+  </div>
+
+  <a class="back-btn" href="/">← Open chat</a>
+
+</main>
+
+</body>
+</html>

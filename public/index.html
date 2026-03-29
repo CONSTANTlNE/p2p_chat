@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>P2P Chat</title>
+  <meta name="description" content="Encrypted peer-to-peer chat. No servers, no accounts, no data stored." />
+  <meta name="theme-color" content="#0f0f13" />
+  <link rel="icon" type="image/webp" href="/p2p_logo.webp" />
+
+
+  <meta property="og:title" content="P2P Chat" />
+  <meta property="og:description" content="Encrypted peer-to-peer chat. No servers, no accounts." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/p2p_logo.webp" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f13;
+      --surface: #1a1a24;
+      --surface2: #22222f;
+      --border: #2e2e3f;
+      --accent: #6c63ff;
+      --accent-dim: #4a4399;
+      --text: #e8e8f0;
+      --text-dim: #8888aa;
+      --own-bubble: #3d3770;
+      --peer-bubble: #22222f;
+      --creator-bubble: #1e4a3a;
+      --joiner-bubble: #22222f;
+      --success: #4caf7d;
+      --warn: #e5a64b;
+      --error: #e5534b;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Landing ─────────────────────────────────────────────────── */
+
+    #landing {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      padding: 2rem;
+    }
+
+    .app-name {
+      font-size: 2.4rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--accent);
+    }
+
+    .app-tagline {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      margin-top: -1.5rem;
+      text-align: center;
+    }
+
+    .landing-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .landing-card h2 {
+      font-size: 1rem;
+      color: var(--text-dim);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    button {
+      padding: 0.65rem 1.2rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: opacity 0.15s, background 0.15s;
+    }
+    button:hover { opacity: 0.85; }
+    button:active { opacity: 0.7; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      width: 100%;
+      padding: 0.8rem;
+      font-size: 1rem;
+    }
+
+    .btn-sm {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+    }
+
+    #recent-rooms {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    #recent-rooms li a {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.7rem;
+      border-radius: 6px;
+      background: var(--surface2);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.9rem;
+      border: 1px solid var(--border);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    #recent-rooms li a:hover { border-color: var(--accent); }
+    #recent-rooms li a.room-creator {
+      background: #1a2a1e;
+      border-color: #2a6b52;
+    }
+    #recent-rooms li a.room-creator:hover { border-color: var(--success); }
+    #recent-rooms li a.room-participant {
+      background: #1a1a2e;
+      border-color: #3a3a6a;
+    }
+    #recent-rooms li a.room-participant:hover { border-color: var(--accent); }
+    .room-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      flex-shrink: 0;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .room-badge.creator { background: #2a6b52; color: #a0f0c0; }
+    .room-badge.participant { background: #3a3a6a; color: #a0a0f0; }
+    #recent-rooms .empty { color: var(--text-dim); font-size: 0.9rem; padding: 0.25rem 0; }
+
+    .identity-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+    #my-name {
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 1px dashed var(--border);
+    }
+    #my-name:hover { border-color: var(--accent); }
+
+    /* ── Chat ────────────────────────────────────────────────────── */
+
+    #chat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      min-height: 0;
+      position: relative;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .chat-header-left { flex: 1; display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+
+    #peer-name {
+      font-weight: 700;
+      font-size: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status {
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+    .status.connecting  { color: var(--warn); }
+    .status.waiting     { color: var(--text-dim); }
+    .status.connected   { color: var(--success); }
+    .status.disconnected{ color: var(--error); }
+    .status.error       { color: var(--error); }
+
+    /* ── Header actions ─────────────────────────────────────────── */
+
+    #retry-btn {
+      display: none;
+      background: var(--warn);
+      color: #000;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.85rem;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Desktop: inline buttons visible, kebab hidden */
+    .header-actions-desktop {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header-actions-desktop .btn-sm.danger { color: var(--error); }
+
+    .menu-wrap { display: none; }
+
+    /* Mobile: kebab visible, inline buttons hidden */
+    @media (max-width: 600px) {
+      .header-actions-desktop { display: none; }
+      .menu-wrap {
+        display: block;
+        position: relative;
+        flex-shrink: 0;
+      }
+    }
+
+    #menu-btn {
+      background: transparent;
+      color: var(--text);
+      padding: 0.4rem 0.6rem;
+      font-size: 1.3rem;
+      line-height: 1;
+      border-radius: 8px;
+      border: 1px solid transparent;
+    }
+    #menu-btn:hover { background: var(--surface2); border-color: var(--border); opacity: 1; }
+
+    #menu-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      min-width: 170px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      z-index: 100;
+      overflow: hidden;
+    }
+    #menu-dropdown.open { display: block; }
+
+    .menu-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: var(--text);
+      border: none;
+      border-radius: 0;
+      padding: 0.7rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .menu-item:hover { background: var(--surface2); opacity: 1; }
+    .menu-item + .menu-item { border-top: 1px solid var(--border); }
+    .menu-item.danger { color: var(--error); }
+
+    /* ── Drag & drop overlay ─────────────────────────────────────── */
+
+    #drop-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(108, 99, 255, 0.15);
+      border: 2px dashed var(--accent);
+      border-radius: 8px;
+      z-index: 50;
+      pointer-events: none;
+      align-items: center;
+      justify-content: center;
+    }
+    #drop-overlay.active { display: flex; }
+    #drop-label {
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    @media (max-width: 600px) {
+      #drop-overlay { display: none !important; }
+    }
+
+    /* ── File / image bubbles ────────────────────────────────────── */
+
+    .bubble-file { padding: 0.6rem 0.75rem; min-width: 180px; }
+
+    .msg-image {
+      display: block;
+      max-width: 260px;
+      max-height: 260px;
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .file-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .file-info {
+      flex: 1;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-dl {
+      flex-shrink: 0;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 6px;
+      padding: 0.3rem 0.65rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .btn-dl:hover { opacity: 0.85; }
+
+    .progress-bar {
+      margin-top: 0.4rem;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.15s;
+    }
+    .file-sent-label {
+      font-size: 0.75rem;
+      color: var(--success);
+      margin-top: 0.25rem;
+    }
+
+    /* ── Messages ────────────────────────────────────────────────── */
+
+    #message-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      scroll-behavior: smooth;
+      min-height: 0;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      max-width: 72%;
+    }
+    .message.own  { align-self: flex-end; align-items: flex-end; }
+    .message.peer { align-self: flex-start; align-items: flex-start; }
+
+    .meta {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-bottom: 0.2rem;
+      padding: 0 0.25rem;
+    }
+
+    .bubble {
+      padding: 0.55rem 0.85rem;
+      border-radius: 14px;
+      line-height: 1.45;
+      font-size: 0.92rem;
+      word-break: break-word;
+    }
+    .message.own  .bubble { background: var(--own-bubble); border-bottom-right-radius: 4px; }
+    .message.peer .bubble { background: var(--peer-bubble); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+    .message.peer.creator-msg .bubble { background: var(--creator-bubble); border-color: #2a6b52; }
+    .message.peer.joiner-msg  .bubble { background: var(--joiner-bubble); }
+
+    /* ── Input ───────────────────────────────────────────────────── */
+
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      align-items: flex-end;
+    }
+
+    #message-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 0.65rem 0.85rem;
+      resize: none;
+      min-height: 42px;
+      max-height: 120px;
+      outline: none;
+      line-height: 1.4;
+    }
+    #message-input:focus { border-color: var(--accent); }
+    #message-input::placeholder { color: var(--text-dim); }
+
+    #send-btn {
+      background: var(--accent);
+      color: #fff;
+      padding: 0.65rem 1.1rem;
+      align-self: flex-end;
+      border-radius: 10px;
+    }
+
+    /* ── Room link bar ───────────────────────────────────────────── */
+
+    .room-link-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      padding: 0.35rem 1rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #room-link {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-dim);
+    }
+
+    /* ── Call buttons in header ─────────────────────────────────── */
+    .call-btns { display: flex; gap: 0.4rem; flex-shrink: 0; }
+    /* Always show call buttons regardless of breakpoint */
+    #call-btns { flex-shrink: 0; }
+    .btn-call {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.4rem 0.65rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      line-height: 1;
+    }
+    .btn-call:hover { opacity: 0.85; }
+    .btn-call.active { background: var(--error); border-color: var(--error); color: #fff; }
+
+    /* ── Incoming call overlay ───────────────────────────────────── */
+    #incoming-call {
+      display: none;
+      position: absolute;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      z-index: 200;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      text-align: center;
+      min-width: 240px;
+    }
+    #incoming-call.show { display: block; }
+    #incoming-call-label { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 0.75rem; }
+    #incoming-call-type { font-weight: 700; font-size: 1.05rem; margin-bottom: 1rem; color: var(--text); }
+    .incoming-call-actions { display: flex; gap: 0.75rem; justify-content: center; }
+    .btn-accept { background: var(--success); color: #fff; padding: 0.55rem 1.2rem; border-radius: 8px; font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer; }
+    .btn-decline { background: var(--error); color: #fff; padding: 0.55rem 1.2rem; border-radius: 8px; font-weight: 700; font-size: 0.95rem; border: none; cursor: pointer; }
+    .btn-accept:hover, .btn-decline:hover { opacity: 0.85; }
+
+    /* ── Video panel ─────────────────────────────────────────────── */
+    #video-panel {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: #000;
+      z-index: 100;
+      flex-direction: column;
+    }
+    #video-panel.show { display: flex; }
+
+    #remote-video {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+    #local-video {
+      position: absolute;
+      bottom: 80px;
+      right: 12px;
+      width: 120px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      background: #222;
+      z-index: 110;
+    }
+    #call-controls {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: linear-gradient(transparent, rgba(0,0,0,0.7));
+    }
+    .btn-ctrl {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      transition: background 0.15s;
+    }
+    .btn-ctrl:hover { background: rgba(255,255,255,0.25); }
+    .btn-ctrl.end { background: var(--error); }
+    .btn-ctrl.muted { background: rgba(255,255,255,0.4); color: #000; }
+
+    /* ── Scrollbar ───────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- ── Landing page ─────────────────────────────────────────────── -->
+<div id="landing">
+  <div class="app-name">P2P Chat</div>
+  <div class="app-tagline">End-to-end encrypted · No servers · Your data stays yours</div>
+
+  <div class="landing-card">
+    <div class="identity-row">
+      Your name: <span id="my-name">…</span> <span style="color:var(--text-dim)">change</span>
+    </div>
+    <button id="create-room-btn" class="btn-primary">Create Room</button>
+  </div>
+
+  <div class="landing-card">
+    <h2>Recent Rooms</h2>
+    <ul id="recent-rooms"><li class="empty">No recent rooms</li></ul>
+  </div>
+
+  <a href="/about.html" style="color:var(--text-dim);font-size:0.8rem;text-decoration:none;border-bottom:1px solid var(--border);">How it works &amp; privacy info</a>
+</div>
+
+<!-- ── Chat page ────────────────────────────────────────────────── -->
+<div id="chat" style="display:none">
+  <div class="chat-header">
+    <div class="chat-header-left">
+      <div id="peer-name">Connecting…</div>
+      <div id="status" class="status connecting">Connecting…</div>
+    </div>
+    <button id="retry-btn">Retry</button>
+
+    <!-- Call buttons (shown when peer connected) -->
+    <div class="call-btns" id="call-btns" style="display:none">
+      <button class="btn-call" id="audio-call-btn" title="Audio call">🎙️</button>
+      <button class="btn-call" id="video-call-btn" title="Video call">📹</button>
+    </div>
+
+    <!-- Desktop inline buttons -->
+    <div class="header-actions-desktop">
+      <button class="btn-sm" id="copy-link">Copy link</button>
+      <button class="btn-sm" id="rename-btn">Rename</button>
+      <button class="btn-sm" id="clear-btn">Clear</button>
+      <button class="btn-sm danger" id="kick-btn" style="display:none">Kick</button>
+      <button class="btn-sm danger" id="ban-btn" style="display:none">Ban</button>
+      <button class="btn-sm danger" id="delete-btn">Delete</button>
+      <button class="btn-sm danger" id="leave-btn">Leave</button>
+    </div>
+
+    <!-- Mobile kebab -->
+    <div class="menu-wrap">
+      <button id="menu-btn" title="Menu">⋮</button>
+      <div id="menu-dropdown">
+        <button class="menu-item" id="video-call-btn-m" style="display:none">📹 Video call</button>
+        <button class="menu-item" id="audio-call-btn-m" style="display:none">🎙️ Audio call</button>
+        <button class="menu-item" id="copy-link-m">Copy invite link</button>
+        <button class="menu-item" id="rename-btn-m">Rename chat</button>
+        <button class="menu-item" id="clear-btn-m">Clear messages</button>
+        <button class="menu-item danger" id="kick-btn-m" style="display:none">Kick peer</button>
+        <button class="menu-item danger" id="ban-btn-m" style="display:none">Ban peer</button>
+        <button class="menu-item danger" id="delete-btn-m">Delete chat</button>
+        <button class="menu-item danger" id="leave-btn-m">Leave</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="room-link-row">
+    <span id="room-link"></span>
+  </div>
+
+  <!-- Incoming call notification -->
+  <div id="incoming-call">
+    <div id="incoming-call-label">Incoming call from</div>
+    <div id="incoming-call-type">Video Call</div>
+    <div class="incoming-call-actions">
+      <button class="btn-accept" id="accept-call-btn">Accept</button>
+      <button class="btn-decline" id="decline-call-btn">Decline</button>
+    </div>
+  </div>
+
+  <!-- Video/audio call panel -->
+  <div id="video-panel">
+    <video id="remote-video" autoplay playsinline></video>
+    <video id="local-video" autoplay playsinline muted></video>
+    <div id="call-controls">
+      <button class="btn-ctrl" id="toggle-mic-btn" title="Mute mic">🎙️</button>
+      <button class="btn-ctrl" id="toggle-cam-btn" title="Toggle camera">📹</button>
+      <button class="btn-ctrl end" id="end-call-btn" title="End call">✕</button>
+    </div>
+  </div>
+
+  <div id="drop-overlay">
+    <div id="drop-label">Drop file to send</div>
+  </div>
+
+  <div id="message-list"></div>
+
+  <div class="input-row">
+    <button id="attach-btn" title="Send file" style="background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:0.55rem 0.7rem;font-size:1.1rem;border-radius:10px;flex-shrink:0;">📎</button>
+    <input id="file-input" type="file" accept="*/*" style="display:none">
+    <textarea id="message-input" placeholder="" rows="1"></textarea>
+    <button id="send-btn">Send</button>
+  </div>
+</div>
+
+<script type="module" src="./chat.js"></script>
+<script>
+  // Kebab menu toggle
+  const menuBtn = document.getElementById('menu-btn');
+  const menuDrop = document.getElementById('menu-dropdown');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    menuDrop.classList.toggle('open');
+  });
+  document.addEventListener('click', () => menuDrop.classList.remove('open'));
+  menuDrop.addEventListener('click', () => menuDrop.classList.remove('open'));
+</script>
+</body>
+</html>
