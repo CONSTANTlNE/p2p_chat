@@ -2,7 +2,7 @@ import { getOrCreateIdentity, saveRoom, getRoom, getRecentRooms, saveContact, sa
 import { SignalingChannel } from './signaling.js';
 import { RTCPeer } from './rtc.js';
 
-const MAX_FILE_SIZE = 2050 * 1024 * 1024; // 200MB
+const MAX_FILE_SIZE = 205 * 1024 * 1024; // 200MB
 
 let identity = null;
 let roomId = null;
@@ -233,7 +233,7 @@ async function sendMessage() {
 
 async function sendFile(file) {
   if (file.size > MAX_FILE_SIZE) {
-    alert(`File too large. Maximum size is 100 MB.`);
+    alert(`File too large. Maximum size is 200 MB.`);
     return;
   }
   if (!rtcPeer || !rtcPeer.channel || rtcPeer.channel.readyState !== 'open') {

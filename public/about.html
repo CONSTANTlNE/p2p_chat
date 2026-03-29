@@ -256,6 +256,20 @@
     <div class="page-subtitle">P2P Chat connects you directly to another person — no middleman reads or stores your conversation.</div>
   </div>
 
+  <!-- Online requirement -->
+  <div class="card warning">
+    <div class="card-header">
+      <span class="card-icon">🔴</span>
+      <span class="card-title">Both people must be online at the same time</span>
+    </div>
+    <p>
+      This is not like email or regular messaging apps. <strong>There is no inbox, no queue, and no offline delivery.</strong> If the other person is not currently in the room with you, your messages will not reach them — and theirs will not reach you.
+    </p>
+    <p>
+      Share the room link, agree on a time, and open it together. The chat only works while both of you are connected simultaneously.
+    </p>
+  </div>
+
   <!-- Privacy first -->
   <div class="card highlight-green">
     <div class="card-header">
@@ -263,7 +277,7 @@
       <span class="card-title">Your conversation is private</span>
     </div>
     <p>
-      Once a connection is established, messages, calls, and file transfers travel <strong>directly between your browser and your peer's browser</strong> using WebRTC — the same technology used in video calling apps. No server ever sees your content.
+      Once a connection is established, messages, calls, and file transfers travel <strong>directly between your browser and your peer's browser</strong> using WebRTC — the same technology used in video calling apps like Google Meet , Zooom (browser version). No server ever sees your content.
     </p>
     <p>
       There are no accounts, no logins, and no email addresses. You get a randomly generated identity when you first open the app. You can rename it to anything you like.
@@ -315,8 +329,28 @@
     <div class="feature-item">
       <span class="feature-item-icon">📎</span>
       <span class="feature-item-label">File transfer</span>
-      <span class="feature-item-desc">Send files up to 100 MB directly to your peer with progress tracking.</span>
+      <span class="feature-item-desc">Send files up to 200 MB directly to your peer with progress tracking.</span>
     </div>
+  </div>
+
+  <!-- File transfer -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-icon">📎</span>
+      <span class="card-title">How file transfer works</span>
+    </div>
+    <p>
+      Files are sent <strong>directly to your peer over the WebRTC data channel</strong> — no upload to any server. The maximum file size is <strong>200 MB</strong>.
+    </p>
+    <p>
+      When you send a file, your browser reads it fully into memory and splits it into <strong>16 KB chunks</strong>. Each chunk is stamped with a transfer ID and a sequence number, then streamed to the peer one by one. If the send buffer fills up, sending pauses automatically until the peer catches up, so large files don't overwhelm the connection.
+    </p>
+    <p>
+      On the receiving end, chunks are reassembled in order and combined into a single file when the last chunk arrives. Both sides show a live progress bar during the transfer. Once complete, the file is <strong>saved to your browser's local storage (IndexedDB)</strong> so you can download it later even after the peer disconnects.
+    </p>
+    <p>
+      Because the entire file is held in memory during transfer, <strong>both sender and receiver use RAM equal to the file size</strong> while the transfer is in progress. On low-memory devices, very large files near the 200 MB limit may cause slowdowns.
+    </p>
   </div>
 
   <!-- Data storage warning -->
